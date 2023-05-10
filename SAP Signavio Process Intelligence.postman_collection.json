@@ -1,0 +1,149 @@
+{
+	"info": {
+		"_postman_id": "9d4c4982-4843-49d5-8745-b696fbb285e1",
+		"name": "SAP Signavio Process Intelligence",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Ingestion API",
+			"item": [
+				{
+					"name": "Upload Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Upload succeeded\", () => {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.text()).to.include(\"executionId\");",
+									"    pm.environment.set(\"executionId\", pm.response.json().payload.executionId);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Reset execution ID before new POST\r",
+									"pm.environment.unset(\"executionId\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "schema",
+									"value": "{{schema}}",
+									"type": "default"
+								},
+								{
+									"key": "primaryKeys",
+									"value": "{{primaryKeys}}",
+									"type": "default"
+								},
+								{
+									"key": "delimiter",
+									"value": "{{delimiter}}",
+									"type": "default"
+								},
+								{
+									"key": "file1",
+									"contentType": "",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/spi/ingestions/v1/data",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"spi",
+								"ingestions",
+								"v1",
+								"data"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Upload Status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/spi/ingestions/v1/{{executionId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"spi",
+								"ingestions",
+								"v1",
+								"{{executionId}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{authenticationToken}}",
+						"type": "string"
+					}
+				]
+			}
+		}
+	]
+}
