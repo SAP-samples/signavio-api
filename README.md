@@ -6,7 +6,7 @@
 
 ## Description
 
-This repository provides Postman collections and environments as well as other guidance to jumpstart your development with SAP Signavio.
+This repository provides Postman collections and environments as well as other guidance to jumpstart your development with SAP Signavio solutions.
 
 ### Postman Collections
 
