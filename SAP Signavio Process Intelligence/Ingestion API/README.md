@@ -37,7 +37,7 @@ To use the collection, perform the following steps:
 2. Select the files containing the data to be uploaded. In the Collections sidebar, select **SAP Signavio Process Intelligence** &rarr; **Ingestion API** &rarr; **Upload Data**.<br>This opens the Upload Data details view.
 3. Select **Body**.<br>This opens a table of request body parameters. Some parameters are already present.
 4. In the table, add a new row for each data file to be uploaded. Ensure each entry is of type 'File' and choose the file using the **Select Files** button.
-5. Dispatch the Upload Data request with **Send**.<br>After a short wait, you should receive a repsonse containing `status` and `payload` properties.
+5. Dispatch the Upload Data request with **Send**.<br>After a short wait, you should receive a response containing `status` and `payload` properties.
 6. Open the Get Upload Status request. In the Collections sidebar, select **SAP Signavio Process Intelligence** &rarr; **Ingestion API** &rarr; **Get Upload Status**.<br>This opens the Get Upload Status details view. The address of this request contains the `{{executionId}}` variable. It is assigned a value automatically after a successful Upload Data request. You don't need to enter a value for this variable.
 7. Dispatch the Get Upload Status request with **Send**.<br>After a short wait, you should receive a response containing `status` and `payload` properties.
 
