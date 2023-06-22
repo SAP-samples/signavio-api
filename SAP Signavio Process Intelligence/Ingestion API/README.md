@@ -29,11 +29,12 @@ The associated environment defines several variables. Select the environment 'SA
 To use the collection, perform the following steps:
 
 1. Enter suitable values for all variables. Open the 'SAP Signavio Process Intelligence' environment and provide values for:
-   * `schema`: The JSON (Avro) schema for which this data is pushed.
+   * `schema`: The schema for which this data is pushed. Written in JSON using the Apache Avro format.
    * `primaryKeys`: The comma separated list of primary keys, for example '`key1,key2,key3`'.
    * `authenticationToken`: The authentication token associated with your connection.
    * `delimiter`: The delimiter character separating the fields in your data files.
    * `baseUrl`: The region-specific base URL of the server. To determine the value for your region, see [Ingestion API](https://help.sap.com/docs/signavio-process-intelligence/api-guide/ingestion-api#ingestion-api-base-url). 
+   <br>**Note:** The environment file comes with example values for `schema`, `primaryKeys` and `delimiter` already entered. These values are compatible with the test data in `example-data.csv` should you wish to test using that file. Otherwise, replace them with values suitable for your own data.
 2. Select the files containing the data to be uploaded. In the Collections sidebar, select **SAP Signavio Process Intelligence** &rarr; **Ingestion API** &rarr; **Upload Data**.<br>This opens the Upload Data details view.
 3. Select **Body**.<br>This opens a table of request body parameters. Some parameters are already present.
 4. In the table, add a new row for each data file to be uploaded. Ensure each entry is of type 'File' and choose the file using the **Select Files** button.
@@ -41,6 +42,9 @@ To use the collection, perform the following steps:
 6. Open the Get Upload Status request. In the Collections sidebar, select **SAP Signavio Process Intelligence** &rarr; **Ingestion API** &rarr; **Get Upload Status**.<br>This opens the Get Upload Status details view. The address of this request contains the `{{executionId}}` variable. It is assigned a value automatically after a successful Upload Data request. You don't need to enter a value for this variable.
 7. Dispatch the Get Upload Status request with **Send**.<br>After a short wait, you should receive a response containing `status` and `payload` properties.
 
+## Further Reading
+
+* Learn more about the [Apache Avro format](https://avro.apache.org/docs/1.11.1/specification/).
 
 ## Known Issues
 
