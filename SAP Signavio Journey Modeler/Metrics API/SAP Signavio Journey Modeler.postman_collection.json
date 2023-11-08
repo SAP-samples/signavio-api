@@ -1,0 +1,57 @@
+{
+	"info": {
+		"_postman_id": "38f7e2fc-a0ba-4ae3-8328-b814815b976c",
+		"name": "SAP Signavio Journey Modeler",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30714772"
+	},
+	"item": [
+		{
+			"name": "Metrics",
+			"item": [
+				{
+					"name": "Update Metric",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"value\": {\n        \"promoters\": 0,\n        \"passives\": 0,\n        \"detractors\": 0,\n        \"time\": \"2023-10-06T11:03:46.797Z\"\n    },\n    \"type\": \"NPS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/jm/v1/journeys/{{journeyId}}/metrics/{{metricId}}/value",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"jm",
+								"v1",
+								"journeys",
+								"{{journeyId}}",
+								"metrics",
+								"{{metricId}}",
+								"value"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
