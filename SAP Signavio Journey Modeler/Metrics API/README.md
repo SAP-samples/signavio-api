@@ -1,4 +1,4 @@
-# Postman Collection for Journey Modeler Metrics API
+# Postman Collection for SAP Signavio Journey Modeler Metrics API
 
 ## Description
 
