@@ -29,15 +29,15 @@ To use the collection, perform the following steps:
 
 The base URL of the request is region-specific. Choose the URL corresponding with your region:
 
-| Region        | Base URL                    |
-|---------------|-----------------------------|
-| Australia	    | api.au.signavio.cloud.sap   |
-| Canada	    | api.ca.signavio.cloud.sap   |
-| EU	        | api.eu.signavio.cloud.sap   |
-| Japan	        | api.jp.signavio.cloud.sap   |
-| Singapore	    | api.sgp.signavio.cloud.sap  |
-| South Korea	| api.kr.signavio.cloud.sap   |
-| USA	        | api.us.signavio.cloud.sap   |
+| Region        | Base URL                     |
+|---------------|------------------------------|
+| Australia	    | `api.au.signavio.cloud.sap`  |
+| Canada	    | `api.ca.signavio.cloud.sap`  |
+| EU	        | `api.eu.signavio.cloud.sap`  |
+| Japan	        | `api.jp.signavio.cloud.sap`  |
+| Singapore	    | `api.sgp.signavio.cloud.sap` |
+| South Korea	| `api.kr.signavio.cloud.sap`  |
+| USA	        | `api.us.signavio.cloud.sap`  |
 
 
 ## Further Reading
