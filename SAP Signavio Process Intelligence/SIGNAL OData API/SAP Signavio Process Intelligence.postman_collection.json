@@ -1,0 +1,168 @@
+{
+	"info": {
+		"_postman_id": "3163093e-191e-4024-a130-51a1a206a52e",
+		"name": "SAP Signavio Process Intelligence",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30714772"
+	},
+	"item": [
+		{
+			"name": "SIGNAL OData API",
+			"item": [
+				{
+					"name": "Root Service",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{baseUrl}}/pi/signal/odata/v1/",
+							"protocol": "https",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pi",
+								"signal",
+								"odata",
+								"v1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Metadata Service",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{baseUrl}}/pi/signal/odata/v1/$metadata",
+							"protocol": "https",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pi",
+								"signal",
+								"odata",
+								"v1",
+								"$metadata"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Entity Service",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{baseUrl}}/pi/signal/odata/v1/{{entitySetName}}",
+							"protocol": "https",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"pi",
+								"signal",
+								"odata",
+								"v1",
+								"{{entitySetName}}"
+							],
+							"query": [
+								{
+									"key": "$count",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "$deltaToken",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "$expand",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "$filter",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "$format",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "$id",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "$orderby",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "$search",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "$select",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "$skip",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "$top",
+									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
