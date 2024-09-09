@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "38f7e2fc-a0ba-4ae3-8328-b814815b976c",
+		"_postman_id": "852c435d-e9ff-4aa4-8782-b6c3056ff996",
 		"name": "SAP Signavio Journey Modeler",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "30714772"
@@ -26,7 +26,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"value\": {\n        \"promoters\": 0,\n        \"passives\": 0,\n        \"detractors\": 0,\n        \"time\": \"2023-10-06T11:03:46.797Z\"\n    },\n    \"type\": \"NPS\"\n}",
+							"raw": "{\n    \"value\": {\n        \"promoters\": 3,\n        \"passives\": 2,\n        \"detractors\": 1,\n        \"score\": 0,\n        \"time\": \"2023-10-06T11:03:46.797Z\"\n    },\n    \"type\": \"NPS\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
