@@ -32,13 +32,14 @@ To use the collection, perform the following steps:
    * `baseUrl`: The region-specific base URL of the server. To determine the value for your region, see [Base URL](https://help.sap.com/docs/signavio-journey-modeler/sap-signavio-journey-modeler-api-guide/manual-and-automated-data#base-url).
    * `token`: The authentication token you obtained in step 1.
 3. From the workspace sidebar, open **Collections** and select **SAP Signavio Journey Modeler** &rarr; **Metrics** &rarr; **Update Metric**.
-4. Open the **Body** of the request and enter the payload value. The payload should adhere to the following format:
+4. Open the **Body** of the request and enter the payload value. The payload should contain a metric value. The formats of the available metrics are documented in the [SAP Business Accelerator Hub](https://api.sap.com/api/MetricsExternal/path/addAutomaticMeasurementToMetric). For example, to add an NPS measurement, the format should be as follows:
    ```
    {
         "value": {
             "promoters": <<numberOfPromoters>>,
             "passives": <<numberOfPassives>>,
             "detractors": <<numberOfDetractors>>,
+            "score": <<scoreValue>>,
             "time": <<timestamp>>
         },
         "type": "NPS"
