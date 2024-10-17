@@ -1,11 +1,110 @@
 {
 	"info": {
-		"_postman_id": "e1409057-3b89-4abf-9ff7-3d1a1ee09908",
+		"_postman_id": "5ae67f6f-14fd-48af-b540-07e805ab0096",
 		"name": "SAP Signavio Process Manager",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "30714772"
 	},
 	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"const isSuccessfulLogin = responseCode.code === 200",
+									"",
+									"tests[\"login succeeded.\"] = isSuccessfulLogin",
+									"if (isSuccessfulLogin) {",
+									"    postman.setEnvironmentVariable('local.JSESSIONID', postman.getResponseCookie('JSESSIONID').value)",
+									"    postman.setEnvironmentVariable('local.token', postman.getResponseCookie('token').value)",
+									"    postman.setEnvironmentVariable('local.identifier', postman.getResponseCookie('identifier').value)",
+									"    postman.setEnvironmentVariable('local.login', postman.getResponseCookie('login').value)",
+									"}"
+								]
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"postman.setEnvironmentVariable('local.JSESSIONID', null)",
+									"postman.setEnvironmentVariable('local.token', null)",
+									"postman.setEnvironmentVariable('local.identifier',null)",
+									"postman.setEnvironmentVariable('local.login', null)"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "User-Agent",
+								"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "tokenonly",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "{{username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								},
+								{
+									"key": "tenant",
+									"value": "{{tenantId}}",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{host}}/auth/v1/token",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"auth",
+								"v1",
+								"token"
+							],
+							"query": [
+								{
+									"key": "tenantId",
+									"value": "{{local.tenantId}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "Folders",
 			"item": [
@@ -15,7 +114,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"type": "text/javascript",
 								"exec": [
 									"const isSuccessFull = responseCode.code === 200",
 									"",
@@ -24,7 +122,9 @@
 									"    postman.setEnvironmentVariable('local.rootFolderId', JSON.parse(responseBody)[0].href.replace('/directory/', ''))",
 									"    postman.setEnvironmentVariable('local.myDocumentsId', JSON.parse(responseBody)[1].href.replace('/directory/', ''))",
 									"}"
-								]
+								],
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -45,7 +145,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/directory",
+							"raw": "https://{{host}}/spm/v1/directory",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -96,7 +197,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/directory/{{local.rootFolderId}}",
+							"raw": "https://{{host}}/spm/v1/directory/{{local.rootFolderId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -166,7 +268,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/directory",
+							"raw": "https://{{host}}/spm/v1/directory",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -230,7 +333,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/directory/{{local.exampleFolderId}}/info",
+							"raw": "https://{{host}}/spm/v1/directory/{{local.exampleFolderId}}/info",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -291,7 +395,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/directory/{{local.exampleFolderId}}",
+							"raw": "https://{{host}}/spm/v1/directory/{{local.exampleFolderId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -345,7 +450,8 @@
 							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/directory/{{local.exampleFolderId}}",
+							"raw": "https://{{host}}/spm/v1/directory/{{local.exampleFolderId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -3392,7 +3498,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/model",
+							"raw": "https://{{host}}/spm/v1/model",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -3463,7 +3570,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/bpmn2_0-import",
+							"raw": "https://{{host}}/spm/v1/bpmn2_0-import",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -3477,7 +3585,7 @@
 					"response": []
 				},
 				{
-					"name": "Fetch diagram",
+					"name": "Fetch diagram revision",
 					"event": [
 						{
 							"listen": "test",
@@ -6471,7 +6579,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/revision/{{local.exampleRevisionId}}/json",
+							"raw": "https://{{host}}/spm/v1/revision/{{local.exampleRevisionId}}/json",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -9481,7 +9590,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/model/{{local.exampleModelId}}/revisions",
+							"raw": "https://{{host}}/spm/v1/model/{{local.exampleModelId}}/revisions",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -12505,7 +12615,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/model/{{local.exampleModelId}}/info",
+							"raw": "https://{{host}}/spm/v1/model/{{local.exampleModelId}}/info",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -15549,7 +15660,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/model",
+							"raw": "https://{{host}}/spm/v1/model",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -18571,7 +18683,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/model/{{local.exampleModelId}}",
+							"raw": "https://{{host}}/spm/v1/model/{{local.exampleModelId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -21614,7 +21727,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/model/{{local.exampleModelId}}",
+							"raw": "https://{{host}}/spm/v1/model/{{local.exampleModelId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -24631,7 +24745,8 @@
 							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/model/{{local.exampleModelId}}",
+							"raw": "https://{{host}}/spm/v1/model/{{local.exampleModelId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -24712,7 +24827,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/glossarycategory",
+							"raw": "https://{{host}}/spm/v1/glossarycategory",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -24793,7 +24909,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/glossary/",
+							"raw": "https://{{host}}/spm/v1/glossary/",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -24843,7 +24960,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/glossary?q=legacy",
+							"raw": "https://{{host}}/spm/v1/glossary?q=legacy",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -24898,7 +25016,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/glossary/{{local.exampleEntryId}}/info/",
+							"raw": "https://{{host}}/spm/v1/glossary/{{local.exampleEntryId}}/info/",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -24950,7 +25069,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/glossary/{{local.exampleEntryId}}",
+							"raw": "https://{{host}}/spm/v1/glossary/{{local.exampleEntryId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25026,7 +25146,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/glossary/{{local.exampleEntryId}}/info",
+							"raw": "https://{{host}}/spm/v1/glossary/{{local.exampleEntryId}}/info",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25077,7 +25198,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/glossarycategory",
+							"raw": "https://{{host}}/spm/v1/glossarycategory",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25126,7 +25248,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/glossarycategory/{{local.exampleCategoryId}}",
+							"raw": "https://{{host}}/spm/v1/glossarycategory/{{local.exampleCategoryId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25196,7 +25319,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/glossarycategory/{{local.exampleCategoryId}}",
+							"raw": "https://{{host}}/spm/v1/glossarycategory/{{local.exampleCategoryId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25250,7 +25374,8 @@
 							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/glossary/{{local.exampleEntryId}}",
+							"raw": "https://{{host}}/spm/v1/glossary/{{local.exampleEntryId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25304,7 +25429,8 @@
 							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/glossarycategory/{{local.exampleCategoryId}}",
+							"raw": "https://{{host}}/spm/v1/glossarycategory/{{local.exampleCategoryId}}",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25374,7 +25500,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/publish",
+							"raw": "https://{{host}}/spm/v1/publish",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25428,7 +25555,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/search?q=application",
+							"raw": "https://{{host}}/spm/v1/search?q=application",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25508,7 +25636,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/syntaxchecker",
+							"raw": "https://{{host}}/spm/v1/syntaxchecker",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25577,7 +25706,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/syntaxchecker",
+							"raw": "https://{{host}}/spm/v1/syntaxchecker",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25657,7 +25787,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/meta",
+							"raw": "https://{{host}}/spm/v1/meta",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25738,7 +25869,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{host}}/spm/v1/meta",
+							"raw": "https://{{host}}/spm/v1/meta",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
@@ -25792,7 +25924,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{host}}/spm/v1/config",
+							"raw": "https://{{host}}/spm/v1/config",
+							"protocol": "https",
 							"host": [
 								"{{host}}"
 							],
