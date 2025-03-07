@@ -1,0 +1,10 @@
+version = 1
+SPDX-PackageName = "signavio-api"
+SPDX-PackageSupplier = "SAP Open Source Program Office ospo@sap.com"
+SPDX-PackageDownloadLocation = "https://github.com/SAP-samples/signavio-api"
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023 SAP SE or an SAP affiliate company and signavio-api contributors."
+SPDX-License-Identifier = "Apache-2.0"
