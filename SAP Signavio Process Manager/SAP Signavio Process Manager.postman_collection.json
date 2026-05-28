@@ -6579,7 +6579,7 @@
 							}
 						],
 						"url": {
-							"raw": "https://{{host}}/spm/v1/model/{{local.exampleRevisionId}}/json",
+							"raw": "https://{{host}}/spm/v1/revision/{{local.exampleRevisionId}}/json",
 							"protocol": "https",
 							"host": [
 								"{{host}}"
@@ -6587,7 +6587,7 @@
 							"path": [
 								"spm",
 								"v1",
-								"model",
+								"revision",
 								"{{local.exampleRevisionId}}",
 								"json"
 							]
