@@ -1,0 +1,126 @@
+{
+  "name": "Scenario B: Approval Result (v2)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "scenario-b-result-v2",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        208,
+        304
+      ],
+      "webhookId": "scenario-b-result-v2"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {}
+      },
+      "id": "node-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        432,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "channelMessage",
+        "teamId": {
+          "__rl": true,
+          "value": "YOUR_TEAMS_TEAM_ID",
+          "mode": "list",
+          "cachedResultName": "SPG approvers"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "19:YOUR_TEAMS_CHANNEL_ID@thread.tacv2",
+          "mode": "list",
+          "cachedResultName": "Notifications"
+        },
+        "message": "={{ $('Build Message').first().json.message }}",
+        "options": {}
+      },
+      "id": "node-notify",
+      "name": "Send Result",
+      "type": "n8n-nodes-base.microsoftTeams",
+      "typeVersion": 2,
+      "position": [
+        640,
+        304
+      ],
+      "webhookId": "9b37d462-444c-4506-89f2-fa0a2762ddb9",
+      "credentials": {
+        "microsoftTeamsOAuth2Api": {
+          "id": "2E6WLFBl6eTvfHIx",
+          "name": "Microsoft Teams account 41"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $('Webhook').first().json.body || $('Webhook').first().json;\nconst approved = body.decision === 'approved';\nconst icon = approved ? '✅' : '❌';\nconst label = approved ? 'APPROVED' : 'REJECTED';\nconst modelName = body.modelName || '';\nconst modelId = body.modelId || '';\nconst link = modelId\n  ? `<br><a href=\"https://YOUR_SPM_HOST/p/hub/model/${modelId}?mode=preview\">Open in SPM</a>`\n  : '';\nconst namePart = modelName ? `<br>Model: <b>${modelName}</b>` : '';\nreturn [{ json: { message: `${icon} <b>Translation ${label}</b>${namePart}${link}` } }];"
+      },
+      "id": "node-build-msg",
+      "name": "Build Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Message": {
+      "main": [
+        [
+          {
+            "node": "Send Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "577a2447-61c6-4613-a3f3-e8d589cb4c69",
+  "meta": {
+    "instanceId": "REDACTEDREDACTED"
+  },
+  "nodeGroups": [],
+  "id": "TNyViPrs60TC2JFH",
+  "tags": []
+}
