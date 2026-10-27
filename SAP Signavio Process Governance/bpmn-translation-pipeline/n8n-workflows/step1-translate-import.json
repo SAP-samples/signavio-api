@@ -1,0 +1,470 @@
+{
+  "name": "Scenario B: BPMN Translate & Import (v2)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "scenario-b-translate-v2",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        400,
+        256
+      ],
+      "webhookId": "scenario-b-translate-v2"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {}
+      },
+      "id": "node-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        624,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json:{\n  spmBaseUrl:     'https://api.YOUR_SPM_REGION.signavio.cloud.sap',\n  spmTenantId:    'YOUR_SPM_TENANT_ID',\n  spmDirectory:   '/directory/YOUR_SPM_DIRECTORY_ID',\n  spmUser:        'YOUR_SPM_USER',\n  spmPassword:    'YOUR_SPM_PASSWORD',\n  aiDeploymentId: 'YOUR_AI_CORE_DEPLOYMENT_ID',\n  targetLanguage: 'German'\n}}];"
+      },
+      "id": "node-config",
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}"
+      },
+      "id": "node-llm",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        1072,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "deploymentId": "YOUR_AI_CORE_DEPLOYMENT_ID"
+      },
+      "id": "node-aicore",
+      "name": "SAP AI Core Model",
+      "type": "CUSTOM.sapAiCoreChatModel",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        592
+      ],
+      "credentials": {
+        "sapAiCoreAuth": {
+          "id": "7N0l3SK5GNIQnBym",
+          "name": "cpit n8n central resource group credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiOutput = $input.first().json.response || $input.first().json.output || $input.first().json.text || '';\nlet translatedTexts;\n\ntry {\n  const cleanContent = aiOutput.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  translatedTexts = JSON.parse(cleanContent);\n  if (!Array.isArray(translatedTexts)) throw new Error('Translation result is not an array');\n} catch (error) {\n  return [{json: {error: true, reason: 'Failed to parse AI response', details: error.message, rawOutput: aiOutput}}];\n}\n\nconst processName = $('Parse Texts').first().json.processName || 'BPMN Process';\nconst targetLang = $('Config').first().json.targetLanguage || 'German';\nconst originalXml = $('Parse Texts').first().json.originalXml;\nconst textsToTranslate = $('Parse Texts').first().json.textsToTranslate;\n\nif (translatedTexts.length !== textsToTranslate.length) {\n  return [{json: {error: true, reason: 'Translation count mismatch', expected: textsToTranslate.length, received: translatedTexts.length}}];\n}\n\nlet translatedXml = originalXml;\nfor (let i = 0; i < textsToTranslate.length; i++) {\n  const original = textsToTranslate[i];\n  const translated = translatedTexts[i];\n  const escapedOriginal = original.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n  translatedXml = translatedXml.replace(new RegExp(escapedOriginal, 'g'), translated);\n}\n\n// Restore definitions name so SPM uses the correct model name\nconst desiredName = processName + ' (' + targetLang + ')';\ntranslatedXml = translatedXml.replace(\n  /(<definitions[^>]+name=\")[^\"]*\"/,\n  function(match, pre) { return pre + desiredName + '\"'; }\n);\n\n\n// Replace definitions id with a fresh one so SPM treats it as a new model\ntranslatedXml = translatedXml.replace(\n  /(<definitions[^>]+id=\")[^\"]*\"/,\n  function(match, pre) { return pre + '_' + Math.random().toString(36).substr(2,9) + '-' + Math.random().toString(36).substr(2,9) + '\"'; }\n);\n\n// Override BPMNDiagram name so SPM displays the correct model name\ntranslatedXml = translatedXml.replace(\n  /(<bpmndi:BPMNDiagram[^>]+name=\")[^\"]*\"/,\n  function(match, pre) { return pre + desiredName + '\"'; }\n);\nconst buffer = Buffer.from(translatedXml, 'utf-8');\n\nreturn [{json: {translationComplete: true, originalTextCount: textsToTranslate.length, translatedTextCount: translatedTexts.length, modelName: processName, targetLang: targetLang}, binary: {data: {data: buffer.toString('base64'), mimeType: 'application/xml', fileName: (processName + ' (' + targetLang + ')').replace(/[\\/\\\\?%*:|\"<>]/g, '-') + '.bpmn'}}}];"
+      },
+      "id": "node-apply",
+      "name": "Apply Translations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.spmBaseUrl + '/auth/v1/token' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ 'tokenonly=true&name=' + encodeURIComponent($('Config').first().json.spmUser) + '&password=' + encodeURIComponent($('Config').first().json.spmPassword) + '&tenant=' + $('Config').first().json.spmTenantId }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "node-auth",
+      "name": "Get Auth Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1648,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.spmBaseUrl + '/spm/v1/login' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-signavio-id",
+              "value": "={{ $json.data }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ 'name=' + encodeURIComponent($('Config').first().json.spmUser) + '&password=' + encodeURIComponent($('Config').first().json.spmPassword) + '&tenant=' + $('Config').first().json.spmTenantId }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "node-login",
+      "name": "SPM Login",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1872,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp=$input.first().json;\nconst cookies=resp.headers?.['set-cookie']||[];\nconst list=Array.isArray(cookies)?cookies:[cookies];\nlet jsessionId='',token='';\nfor(const c of list){\n  const j=c.match(/JSESSIONID=([^;]+)/);if(j)jsessionId=j[1];\n  const t=c.match(/^token=([^;]+)/);if(t)token=t[1];\n}\nconst translateItem=$('Apply Translations').first();\nconst bin=translateItem.binary?.data;\nconsole.log('binary id:'+bin?.id+' dataLen:'+bin?.data?.length+' fileSize:'+bin?.fileSize);\nreturn [{json:{jsessionId,token},binary:translateItem.binary}];"
+      },
+      "id": "node-session",
+      "name": "Extract Session",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.spmBaseUrl + '/spm/v1/bpmn2_0-import' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-signavio-id",
+              "value": "={{ $json.token }}"
+            },
+            {
+              "name": "Cookie",
+              "value": "={{ 'JSESSIONID='+$json.jsessionId+'; tenant='+$('Config').first().json.spmTenantId+'; token='+$json.token }}"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $('Apply Translations').first().json.modelName + ' (' + $('Config').first().json.targetLanguage + ')' }}"
+            },
+            {
+              "name": "directory",
+              "value": "={{ $('Config').first().json.spmDirectory }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "bpmn2_0file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "node-import",
+      "name": "Import BPMN",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2320,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp=$input.first().json;\nconst raw=resp.data||resp.body||resp;\nlet d;\ntry{ d=typeof raw==='string'?JSON.parse(raw):raw; }catch(e){ d={}; }\nconst modelId=d.mainModelId||(d.createdIds||[])[0]||null;\nconsole.log('modelId:'+modelId);\nif(modelId) return [{json:{status:'success',modelId,spmUrl:'https://YOUR_SPM_HOST/p/hub/model/'+modelId+'?mode=preview'}}];\nreturn [{json:{status:'failed',response:d}}];"
+      },
+      "id": "node-logdone",
+      "name": "Log Done",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2544,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "channelMessage",
+        "teamId": {
+          "__rl": true,
+          "value": "YOUR_TEAMS_TEAM_ID",
+          "mode": "list",
+          "cachedResultName": "SPG approvers"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "19:YOUR_TEAMS_CHANNEL_ID@thread.tacv2",
+          "mode": "list",
+          "cachedResultName": "Notifications"
+        },
+        "message": "={{ $('Build Notify Message').first().json.message }}",
+        "options": {}
+      },
+      "id": "node-teams",
+      "name": "Notify Requester",
+      "type": "n8n-nodes-base.microsoftTeams",
+      "typeVersion": 2,
+      "position": [
+        2992,
+        352
+      ],
+      "webhookId": "d29f0976-244e-47cc-965b-c91b5dd762a6",
+      "credentials": {
+        "microsoftTeamsOAuth2Api": {
+          "id": "2E6WLFBl6eTvfHIx",
+          "name": "Microsoft Teams account 41"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst logDone = $('Log Done').first().json;\nconst applied = $('Apply Translations').first().json;\nconst webhookBody = $('Webhook').first().json.body || $('Webhook').first().json;\n\nconst lang = cfg.targetLanguage || 'German';\nconst modelId = logDone.modelId && logDone.modelId !== '?' ? logDone.modelId : null;\nconst count = applied.translatedTextCount || 0;\nconst spmUrl = logDone.spmUrl || '';\nconst modelName = webhookBody.modelName || applied.modelName || '';\n\nconst spmLine = modelId\n  ? `<a href=\"${spmUrl}\">Open Translated Model in SPM</a>`\n  : '<b>⚠️ SPM Import failed</b>';\n\nconst nameLine = modelName ? `<b>Model:</b> ${modelName}<br>` : '';\n\nconst message = `<p>🔄 <b>BPMN Translation Ready for Review</b></p>\n<p>${nameLine}<b>Language:</b> ${lang}<br>\n<b>Elements translated:</b> ${count}</p>\n<p>📄 ${spmLine}</p>\n<p>Please review the model and submit for approval in SPM.</p>`;\n\nreturn [{ json: { message, modelId, lang } }];"
+      },
+      "id": "node-build-notify",
+      "name": "Build Notify Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2768,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get XML content from the HTTP response\nconst webhookBody = $('Webhook').first().json.body || $('Webhook').first().json;\nconst xmlContent = webhookBody.xmlContent || '';\nconst item = { json: { xmlContent } };\n\nif (!xmlContent || xmlContent.length < 50) {\n  console.error('No valid XML content received');\n  console.log('Available keys:', Object.keys(item.json));\n  return [{json: {\n    error: true,\n    reason: 'No XML content in response',\n    availableKeys: Object.keys(item.json),\n    preview: xmlContent.substring(0, 100)\n  }}];\n}\n\nconsole.log('XML content length:', xmlContent.length);\nconsole.log('XML preview:', xmlContent.substring(0, 200));\n\n// Parse XML to extract text from name attributes in BPMN elements\n// Signavio stores translatable text in name=\"\" attributes, not element content\n\n// Extract process name directly from <process name=\"...\">\nconst payloadModelName = webhookBody.modelName || '';\nconst processNameMatch = xmlContent.match(/<(?:[a-zA-Z0-9]+:)?process[^>]+\\sname=\"([^\"]+)\"/);\nconst processName = payloadModelName || (processNameMatch ? processNameMatch[1] : 'BPMN Process');\nconsole.log('Process name:', processName);\nconst patterns = [\n  // name attribute on any BPMN element (tasks, events, gateways, etc.)\n  /\\sname=\"([^\"]+)\"/g,\n  // text content inside bpmn:text or signavio:label elements (fallback)\n  /<(?:bpmn:)?text>([^<]+)<\\/(?:bpmn:)?text>/g,\n  /<(?:signavio:)?label>([^<]+)<\\/(?:signavio:)?label>/g,\n  // documentation elements\n  /<(?:bpmn:)?documentation>([^<]+)<\\/(?:bpmn:)?documentation>/g,\n  // i18n:translation elements\n  /<i18n:translation[^>]*>([^<]+)<\\/i18n:translation>/g\n];\n\nconst textElements = [];\nconst seen = new Set(); // Avoid duplicates\n\nfor (const pattern of patterns) {\n  let match;\n  while ((match = pattern.exec(xmlContent)) !== null) {\n    const text = match[1];\n    if (text && text.trim() && !seen.has(text.trim())) {\n      // Skip technical/system values (UUIDs, URLs, namespaces)\n      if (text.includes('://') || text.match(/^[a-f0-9-]{36}$/i) || text.startsWith('sid-')) {\n        continue;\n      }\n      textElements.push(text.trim());\n      seen.add(text.trim());\n    }\n  }\n}\n\nconsole.log('Extracted ' + textElements.length + ' text elements');\nif (textElements.length > 0) {\n  console.log('Sample texts:', textElements.slice(0, 5));\n}\n\nif (textElements.length === 0) {\n  console.warn('No translatable text found in BPMN');\n  // Show more of the XML to help debug\n  return [{json: {\n    error: true,\n    reason: 'No text elements found in BPMN',\n    xmlPreview: xmlContent.substring(0, 1000),\n    hint: 'Check if XML uses namespaces or different tag names'\n  }}];\n}\n\nconst targetLang = $('Config').first().json.targetLanguage || 'Spanish';\nconst chatInput = `Translate these ${textElements.length} BPMN element names to ${targetLang}. Return ONLY a JSON array of ${textElements.length} translations in the same order:\\n\\n${JSON.stringify(textElements, null, 2)}`;\n\n// Convert XML to binary for later import\nconst buffer = Buffer.from(xmlContent, 'utf-8');\nconst base64Data = buffer.toString('base64');\n\nreturn [{\n  json: {\n    processName,\n    originalXml: xmlContent,\n    textsToTranslate: textElements,\n    textCount: textElements.length,\n    chatInput: chatInput\n  },\n  binary: {\n    data: {\n      data: base64Data,\n      mimeType: 'application/xml',\n      fileName: 'original.bpmn'\n    }\n  }\n}];"
+      },
+      "id": "node-parse-xml",
+      "name": "Parse Texts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        352
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Parse Texts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Texts": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SAP AI Core Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Apply Translations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Translations": {
+      "main": [
+        [
+          {
+            "node": "Get Auth Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Auth Token": {
+      "main": [
+        [
+          {
+            "node": "SPM Login",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SPM Login": {
+      "main": [
+        [
+          {
+            "node": "Extract Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Session": {
+      "main": [
+        [
+          {
+            "node": "Import BPMN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Import BPMN": {
+      "main": [
+        [
+          {
+            "node": "Log Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Done": {
+      "main": [
+        [
+          {
+            "node": "Build Notify Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Notify Message": {
+      "main": [
+        [
+          {
+            "node": "Notify Requester",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "281c2f75-dc9f-4e2b-8960-75c07d12267e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "REDACTEDREDACTED"
+  },
+  "nodeGroups": [],
+  "id": "yjZxmT7hkEiAgwsr",
+  "tags": []
+}
